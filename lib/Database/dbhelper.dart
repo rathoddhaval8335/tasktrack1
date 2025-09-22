@@ -75,4 +75,11 @@ class MyDb {
        whereArgs: [id],
      );
   }
+
+  //Delete
+  Future<int> deletetask(int id) async {
+    Database db = await instance.database;
+    return await db.delete("tasks", where: "id = ?", whereArgs: [id]);
+  }
+
 }

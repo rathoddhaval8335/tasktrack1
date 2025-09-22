@@ -34,96 +34,112 @@ class _PendingtaskState extends State<Pendingtask> {
         itemCount: pendingTask.length,
         itemBuilder: (BuildContext context, int index) {
           var data = pendingTask[index];
-          return Card(
-            elevation: 6,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+          return Dismissible(
+            key: ValueKey(data["id"]),
+            background:  Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.red.shade300,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Icon(Icons.delete, color: Colors.white),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.pending_actions, // Pending icon
-                        color: Colors.orange,
-                        size: 30,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          "${data["task_name"]}",
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+            onDismissed: (direction) async {
+              await _deleteTask(data["id"]);
+            },
+            child: Card(
+              elevation: 6,
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.pending_actions, // Pending icon
+                          color: Colors.orange,
+                          size: 30,
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Text(
-                          "Pending",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.orange,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "${data["task_description"]}",
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today,
-                              size: 16, color: Colors.grey),
-                          const SizedBox(width: 5),
-                          Text(
-                            "${data["task_date"]}",
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "${data["task_name"]}",
                             style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
-                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
-                          "Priority: ${data["task_priority"]}",
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.blue,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            "Pending",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.orange,
+                            ),
                           ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "${data["task_description"]}",
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.grey.shade700,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today,
+                                size: 16, color: Colors.grey),
+                            const SizedBox(width: 5),
+                            Text(
+                              "${data["task_date"]}",
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "Priority: ${data["task_priority"]}",
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -146,5 +162,13 @@ class _PendingtaskState extends State<Pendingtask> {
     setState(() {
       pendingTask = pending;
     });
+  }
+
+  Future<void> _deleteTask(int id) async {
+    await DbHelper.deletetask(id);
+    _loadPendingTasks(); // refresh list
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Task deleted")),
+    );
   }
 }
